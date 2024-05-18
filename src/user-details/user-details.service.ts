@@ -1,45 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UserDetails } from './user-details.entity';
 import { CreateUserDetailDto } from './dto/create-user-detail.dto';
 import { UpdateUserDetailDto } from './dto/update-user-detail.dto';
-import { UserDetail } from './user-detail.model';
 
 @Injectable()
 export class UserDetailsService {
-  private userDetails: UserDetail[] = [];
+  constructor(
+    @InjectRepository(UserDetails)
+    private readonly userDetailsRepository: Repository<UserDetails>,
+  ) {}
 
-  findAll(): UserDetail[] {
-    return this.userDetails;
+  async findAll(): Promise<UserDetails[]> {
+    return await this.userDetailsRepository.find();
   }
 
-  findOne(id: string): UserDetail {
-    return this.userDetails.find((detail) => detail.id === id);
+  async findOne(id: string): Promise<UserDetails> {
+    return await this.userDetailsRepository.findOne({ where: { id } });
   }
 
-  create(createUserDetailDto: CreateUserDetailDto): UserDetail {
-    const newUserDetail: UserDetail = {
-      id: uuidv4(),
-      ...createUserDetailDto,
-    };
-    this.userDetails.push(newUserDetail);
-    return newUserDetail;
+  async create(
+    createUserDetailsDto: CreateUserDetailDto,
+  ): Promise<UserDetails> {
+    const userDetails = this.userDetailsRepository.create(createUserDetailsDto);
+    return await this.userDetailsRepository.save(userDetails);
   }
 
-  update(id: string, updateUserDetailDto: UpdateUserDetailDto): UserDetail {
-    const detailIndex = this.userDetails.findIndex(
-      (detail) => detail.id === id,
-    );
-    if (detailIndex === -1) {
-      return null;
-    }
-    this.userDetails[detailIndex] = {
-      ...this.userDetails[detailIndex],
-      ...updateUserDetailDto,
-    };
-    return this.userDetails[detailIndex];
+  async update(
+    id: string,
+    updateUserDetailsDto: UpdateUserDetailDto,
+  ): Promise<UserDetails> {
+    await this.userDetailsRepository.update(id, updateUserDetailsDto);
+    return await this.findOne(id);
   }
 
-  delete(id: string): void {
-    this.userDetails = this.userDetails.filter((detail) => detail.id !== id);
+  async delete(id: string): Promise<void> {
+    await this.userDetailsRepository.delete(id);
   }
 }

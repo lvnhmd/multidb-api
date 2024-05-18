@@ -1,80 +1,82 @@
 import { Injectable } from '@nestjs/common';
-import { v4 as uuid } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, In } from 'typeorm';
+import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserDetailsService } from '../user-details/user-details.service';
-import { RolesService } from '../roles/roles.service';
-import { User } from './user.model';
+import { UserDetails } from '../user-details/user-details.entity';
+import { Role } from '../roles/role.entity';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [];
-
   constructor(
-    private readonly userDetailsService: UserDetailsService,
-    private readonly rolesService: RolesService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(UserDetails)
+    private readonly userDetailsRepository: Repository<UserDetails>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
   ) {}
 
-  findAll(): User[] {
-    return this.users;
+  async findAll(): Promise<User[]> {
+    return await this.userRepository.find({
+      relations: ['userDetails', 'roles'],
+    });
   }
 
-  findOne(id: string): User {
-    return this.users.find((user) => user.id === id);
+  async findOne(id: string): Promise<User> {
+    return await this.userRepository.findOne({
+      where: { id },
+      relations: ['userDetails', 'roles'],
+    });
   }
 
-  create(createUserDto: CreateUserDto): User {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     const { name, userDetails, roleIds } = createUserDto;
-    const newUserDetail = this.userDetailsService.create(userDetails);
+    const userDetailsEntity = this.userDetailsRepository.create(userDetails);
+    await this.userDetailsRepository.save(userDetailsEntity);
 
-    const roles = roleIds
-      ? roleIds.map((roleId) => this.rolesService.findOne(roleId))
-      : null;
-    const newUser: User = {
-      id: uuid(),
+    const roles = await this.roleRepository.findBy({
+      id: In(roleIds),
+    });
+
+    const user = this.userRepository.create({
       name,
-      userDetails: newUserDetail,
-      ...(roles && { roles }),
-    };
-    this.users.push(newUser);
-    return newUser;
+      userDetails: userDetailsEntity,
+      roles,
+    });
+    return await this.userRepository.save(user);
   }
 
-  update(id: string, updateUserDto: UpdateUserDto): User {
-    const userIndex = this.users.findIndex((user) => user.id === id);
-    if (userIndex === -1) {
-      return null;
-    }
-    const user = this.users[userIndex];
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['userDetails', 'roles'],
+    });
 
     if (updateUserDto.userDetails) {
-      user.userDetails = {
-        ...user.userDetails,
-        ...updateUserDto.userDetails,
-      };
-      this.userDetailsService.update(user.userDetails.id, user.userDetails);
+      await this.userDetailsRepository.update(
+        user.userDetails.id,
+        updateUserDto.userDetails,
+      );
     }
 
-    let updatedRoles = user.roles;
     if (updateUserDto.roleIds) {
-      updatedRoles = updateUserDto.roleIds
-        .map((roleId) => this.rolesService.findOne(roleId))
-        .filter((role) => role !== undefined && role !== null);
+      const roles = await this.roleRepository.findBy({
+        id: In(updateUserDto.roleIds),
+      });
+      user.roles = roles;
     }
 
-    const updatedUser = {
-      ...user,
-      ...updateUserDto,
-      roles: updatedRoles,
-      userDetails: user.userDetails,
-    };
-    delete updatedUser.roleIds;
+    if (updateUserDto.name) {
+      user.name = updateUserDto.name;
+    }
 
-    this.users[userIndex] = updatedUser;
-    return this.users[userIndex];
+    await this.userRepository.save(user);
+    return this.findOne(id);
   }
 
-  delete(id: string): void {
-    this.users = this.users.filter((user) => user.id !== id);
+  async delete(id: string): Promise<void> {
+    await this.userRepository.delete(id);
   }
 }

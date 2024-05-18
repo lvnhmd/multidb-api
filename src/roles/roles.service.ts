@@ -1,42 +1,50 @@
 import { Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Role } from './role.entity';
+import { User } from '../users/user.entity';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { Role } from './role.model';
 
 @Injectable()
 export class RolesService {
-  private roles: Role[] = [];
+  constructor(
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
-  findAll(): Role[] {
-    return this.roles;
+  async findAll(): Promise<Role[]> {
+    return this.roleRepository.find({
+      relations: ['users'],
+    });
   }
 
-  findOne(id: string): Role {
-    const role = this.roles.find((role) => role.id === id);
-    console.log(`Found one role: ${JSON.stringify(role)}`);
-    return role;
+  async findOne(id: string): Promise<Role> {
+    return this.roleRepository.findOne({ where: { id }, relations: ['users'] });
   }
 
-  create(createRoleDto: CreateRoleDto): Role {
-    const newRole: Role = {
-      id: uuidv4(),
-      ...createRoleDto,
-    };
-    this.roles.push(newRole);
-    return newRole;
+  async create(createRoleDto: CreateRoleDto): Promise<Role> {
+    const role = this.roleRepository.create(createRoleDto);
+    return this.roleRepository.save(role);
   }
 
-  update(id: string, updateRoleDto: UpdateRoleDto): Role {
-    const roleIndex = this.roles.findIndex((role) => role.id === id);
-    if (roleIndex === -1) {
-      return null;
-    }
-    this.roles[roleIndex] = { ...this.roles[roleIndex], ...updateRoleDto };
-    return this.roles[roleIndex];
+  async update(id: string, updateRoleDto: UpdateRoleDto): Promise<Role> {
+    await this.roleRepository.update(id, updateRoleDto);
+    return this.findOne(id);
   }
 
-  delete(id: string): void {
-    this.roles = this.roles.filter((role) => role.id !== id);
+  async delete(id: string): Promise<void> {
+    await this.roleRepository.manager.transaction(async (entityManager) => {
+      await entityManager
+        .createQueryBuilder()
+        .delete()
+        .from('user_roles_role')
+        .where('roleId = :id', { id })
+        .execute();
+
+      await entityManager.delete(Role, id);
+    });
   }
 }
