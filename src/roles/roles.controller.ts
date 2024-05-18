@@ -7,7 +7,7 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import { Role } from './role.model';
+import { Role } from './role.entity';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
@@ -17,27 +17,30 @@ export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   @Get()
-  findAll(): Role[] {
-    return this.rolesService.findAll();
+  async findAll(): Promise<Role[]> {
+    return await this.rolesService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Role {
-    return this.rolesService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<Role> {
+    return await this.rolesService.findOne(id);
   }
 
   @Post()
-  create(@Body() createRoleDto: CreateRoleDto): Role {
-    return this.rolesService.create(createRoleDto);
+  async create(@Body() createRoleDto: CreateRoleDto): Promise<Role> {
+    return await this.rolesService.create(createRoleDto);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto): Role {
-    return this.rolesService.update(id, updateRoleDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateRoleDto: UpdateRoleDto,
+  ): Promise<Role> {
+    return await this.rolesService.update(id, updateRoleDto);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string): void {
-    this.rolesService.delete(id);
+  async delete(@Param('id') id: string): Promise<void> {
+    return await this.rolesService.delete(id);
   }
 }
