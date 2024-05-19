@@ -6,23 +6,50 @@ services:
     build: .
     ports:
       - '3000:3000'
-    environment:
-      - DATABASE_URL=postgres://elvin:secret@db:5432/bullhorn
     depends_on:
-      - db
+      - master_db
+      - tenant1_db
+      - tenant2_db
+    entrypoint: ["/usr/src/app/entrypoint.sh", "tenant1_db tenant2_db"]
     command: yarn start:dev
 
-  db:
+  master_db:
     image: postgres:13
-    container_name: bullhorn-postgres-db
+    container_name: bullhorn-master-db
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: elvin
+      POSTGRES_USER: master
       POSTGRES_PASSWORD: secret
-      POSTGRES_DB: bullhorn
+      POSTGRES_DB: master_db
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - master_pgdata:/var/lib/postgresql/data
+
+  tenant1_db:
+    image: postgres:13
+    container_name: bullhorn-tenant1-db
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: tenant1
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: tenant1_db
+    volumes:
+      - tenant1_pgdata:/var/lib/postgresql/data
+  
+  tenant2_db:
+    image: postgres:13
+    container_name: bullhorn-tenant2-db
+    ports:
+      - '5434:5432'
+    environment:
+      POSTGRES_USER: tenant2
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: tenant2_db
+    volumes:
+      - tenant2_pgdata:/var/lib/postgresql/data
 
 volumes:
-  pgdata:
+  master_pgdata:
+  tenant1_pgdata:
+  tenant2_pgdata:
