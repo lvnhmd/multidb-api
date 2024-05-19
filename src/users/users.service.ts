@@ -1,31 +1,37 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Injectable, Scope, Inject } from '@nestjs/common';
+import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetails } from '../user-details/user-details.entity';
 import { Role } from '../roles/role.entity';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
+import { In } from 'typeorm';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(UserDetails)
-    private readonly userDetailsRepository: Repository<UserDetails>,
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
-  ) {}
+  private userRepository: Repository<User>;
+  private userDetailsRepository: Repository<UserDetails>;
+  private roleRepository: Repository<Role>;
+
+  constructor(@Inject(REQUEST) private readonly request: Request) {
+    this.setRepositories();
+  }
+
+  private setRepositories() {
+    const dataSource = this.request['tenantDataSource'];
+    this.userRepository = dataSource.getRepository(User);
+    this.userDetailsRepository = dataSource.getRepository(UserDetails);
+    this.roleRepository = dataSource.getRepository(Role);
+  }
 
   async findAll(): Promise<User[]> {
-    return await this.userRepository.find({
-      relations: ['userDetails', 'roles'],
-    });
+    return this.userRepository.find({ relations: ['userDetails', 'roles'] });
   }
 
   async findOne(id: string): Promise<User> {
-    return await this.userRepository.findOne({
+    return this.userRepository.findOne({
       where: { id },
       relations: ['userDetails', 'roles'],
     });
@@ -45,7 +51,7 @@ export class UsersService {
       userDetails: userDetailsEntity,
       roles,
     });
-    return await this.userRepository.save(user);
+    return this.userRepository.save(user);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {

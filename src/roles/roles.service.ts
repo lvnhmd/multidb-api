@@ -1,19 +1,26 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, Scope, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Role } from './role.entity';
-import { User } from '../users/user.entity';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { User } from '../users/user.entity';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class RolesService {
-  constructor(
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {}
+  private roleRepository: Repository<Role>;
+  private userRepository: Repository<User>;
+
+  constructor(@Inject(REQUEST) private readonly request: Request) {
+    this.setRepositories();
+  }
+
+  private setRepositories() {
+    const dataSource = this.request['tenantDataSource'];
+    this.roleRepository = dataSource.getRepository(Role);
+    this.userRepository = dataSource.getRepository(User);
+  }
 
   async findAll(): Promise<Role[]> {
     return this.roleRepository.find({
