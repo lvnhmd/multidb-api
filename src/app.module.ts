@@ -1,20 +1,28 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
-import { User } from './users/user.entity';
 import { UsersModule } from './users/users.module';
-import { UserDetails } from './user-details/user-details.entity';
-import { Role } from './roles/role.entity';
+import { UserDetailsModule } from './user-details/user-details.module';
 import { RolesModule } from './roles/roles.module';
+import { TenantModule } from './tenants/tenant.module';
+import { TenantMiddleware } from './tenants/tenant.middleware';
+import { TenantDataSourceService } from './tenants/tenant-data-source.service';
 import { SeederService } from './seeder.service';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeOrmConfig),
-    TypeOrmModule.forFeature([User, UserDetails, Role]),
     UsersModule,
+    UserDetailsModule,
     RolesModule,
+    TenantModule,
   ],
-  providers: [SeederService],
+  providers: [TenantDataSourceService, SeederService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(TenantMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}
