@@ -4,8 +4,10 @@ import {
   Post,
   Param,
   Body,
-  Put,
+  Patch,
   Delete,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { Role } from './role.entity';
 import { RolesService } from './roles.service';
@@ -27,11 +29,12 @@ export class RolesController {
   }
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   async create(@Body() createRoleDto: CreateRoleDto): Promise<Role> {
     return await this.rolesService.create(createRoleDto);
   }
 
-  @Put(':id')
+  @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() updateRoleDto: UpdateRoleDto,
@@ -40,6 +43,7 @@ export class RolesController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id') id: string): Promise<void> {
     return await this.rolesService.delete(id);
   }
