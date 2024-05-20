@@ -3,8 +3,7 @@ import { Tenant } from '../tenants/tenant.entity';
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
   type: 'postgres',
-  // host: 'master_db',
-  host: 'localhost',
+  host: 'master_db',
   port: 5432,
   username: 'master',
   password: 'secret',
