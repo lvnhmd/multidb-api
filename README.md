@@ -1,73 +1,56 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+## Multi-Tenant NestJS API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### About
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+NestJS RESTful API supporting runtime database switching for multi-tenancy
 
-## Description
+[Spec](https://github.com/lvnhmd/bullhorn-multidb-api/blob/main/NodeJs%20Interview%20Technical%20Test.pdf)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Installation
+### API Endpoint Documentation
 
-```bash
-$ yarn install
-```
+OpenAPI/Swagger documentation is available at http://localhost:3000/api 
 
-## Running the app
+---
 
-```bash
-# development
-$ yarn run start
+### Running in Development
 
-# watch mode
-$ yarn run start:dev
+Run `docker-compose up --build` to start the application.
 
-# production mode
-$ yarn run start:prod
-```
+The following databases will be created in Docker containers for **Tenant1** and **Tenant2** 
+and seeded with data:
 
-## Test
+`master_db (port 5432)`
 
-```bash
-# unit tests
-$ yarn run test
+`tenant1_db (port 5433)`
 
-# e2e tests
-$ yarn run test:e2e
+`tenant2_db (port 5434)`
 
-# test coverage
-$ yarn run test:cov
-```
+---
 
-## Support
+### Testing
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+`yarn test`
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Configuring Extra Tenants
 
-## License
+1. Edit `docker-compose.yml` to add new tenant database services
 
-Nest is [MIT licensed](LICENSE).
+2. Update the `seeder.service.ts` to include the new tenant configurations
+
+---
+
+### TODO
+
+- [ ] Add examples for request bodies in Swagger documentation 
+- [ ] Fix failing service tests 
+- [ ] Add end to end tests
+- [ ] Move database credentials to environment variables and out of source code
+- [ ] Create repository classes for each entity and refactor services to use these repository classes
+- [ ] Add example to demonstrate a one to many relationship ( e.g User has Tasks )
+- [ ] Add authentication using JWT token and make use of guards
+- [ ] Use Redis to cache the response when getting a resource
+- [ ] Use interceptors for error logs
