@@ -29,7 +29,7 @@ and seeded with data:
 
 ### API Endpoint Documentation
 
-OpenAPI/Swagger documentation is available at http://localhost:3000/api
+The OpenAPI/Swagger documentation can be accessed at http://localhost:3000/api when the application is running
 
 ---
 
