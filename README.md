@@ -4,7 +4,7 @@
 
 NestJS RESTful API supporting runtime database switching for multi-tenancy
 
-[Spec](https://github.com/lvnhmd/bullhorn-multidb-api/blob/main/NodeJs%20Interview%20Technical%20Test.pdf)
+[Spec](https://github.com/lvnhmd/bullhorn-multidb-api/spec/blob/main/NodeJs%20Interview%20Technical%20Test.pdf)
 
 ---
 
@@ -49,7 +49,7 @@ and seeded with data:
 - [ ] Fix failing service tests 
 - [ ] Add end to end tests
 - [ ] Move database credentials to environment variables and out of source code
-- [ ] Create repository classes for each entity and refactor services to use these repository classes
+- [ ] Create repository classes for each entity and refactor services to use them
 - [ ] Add example to demonstrate a one to many relationship ( e.g User has Tasks )
 - [ ] Add authentication using JWT token and make use of guards
 - [ ] Use Redis to cache the response when getting a resource
