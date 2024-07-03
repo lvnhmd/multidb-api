@@ -4,7 +4,7 @@
 
 NestJS RESTful API supporting runtime database switching for multi-tenancy
 
-[Spec](https://github.com/lvnhmd/bullhorn-multidb-api/blob/main/spec/NodeJs%20Interview%20Technical%20Test.pdf)
+[Spec](https://github.com/lvnhmd/multidb-api/blob/main/spec/spec.pdf)
 
 ---
 
