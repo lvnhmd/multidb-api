@@ -10,9 +10,9 @@ NestJS RESTful API supporting runtime database switching for multi-tenancy
 
 ### Running in Development
 
-`git clone https://github.com/lvnhmd/bullhorn-multidb-api.git`
+`git clone https://github.com/lvnhmd/multidb-api.git`
 
-`cd bullhorn-multidb-api`
+`cd multidb-api`
 
 Run `docker-compose up --build` to start the application.
 
@@ -35,7 +35,7 @@ The OpenAPI/Swagger documentation can be accessed at http://localhost:3000/api w
 
 ### Testing
 
-`cd bullhorn-multidb-api`
+`cd multidb-api`
 
 `yarn test`
 
