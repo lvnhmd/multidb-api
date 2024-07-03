@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    container_name: bullhorn-multidb-api
+    container_name: multidb-api
     build: .
     ports:
       - '3000:3000'
@@ -15,7 +15,7 @@ services:
 
   master_db:
     image: postgres:13
-    container_name: bullhorn-master-db
+    container_name: master-db
     ports:
       - '5432:5432'
     environment:
@@ -27,7 +27,7 @@ services:
 
   tenant1_db:
     image: postgres:13
-    container_name: bullhorn-tenant1-db
+    container_name: tenant1-db
     ports:
       - '5433:5432'
     environment:
@@ -39,7 +39,7 @@ services:
   
   tenant2_db:
     image: postgres:13
-    container_name: bullhorn-tenant2-db
+    container_name: tenant2-db
     ports:
       - '5434:5432'
     environment:
